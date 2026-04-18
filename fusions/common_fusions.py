@@ -5,6 +5,8 @@ from torch import nn
 from torch.nn import functional as F
 import pdb
 from torch.autograd import Variable
+import torch.optim as optim
+from mamba_ssm import Mamba
 
 
 
@@ -25,6 +27,9 @@ class Concat(nn.Module):
         for modality in modalities:
             flattened.append(torch.flatten(modality, start_dim=1))
         return torch.cat(flattened, dim=1)
+
+        # print(f"Shape of Cat output : {temp.shape}")
+    
 
 
 
@@ -471,3 +476,81 @@ class LateFusionTransformer(nn.Module):
         x = x.permute(2, 0, 1)
         x = self.transformer(x)[-1]
         return x
+
+
+class MambaFusion(nn.Module):
+    
+    def __init__(self, d_model=128, d_state=16, num_classes=2):
+        """Initialize SimpleMambaFusion Architecture"""
+
+        super().__init__()
+
+        self.d_model = d_model
+        # self.projections = nn.ModuleList()
+        # if proj_dims is not None:
+        #     for d_in in proj_dims:
+        #         self.projections.append(nn.Linear(d_in, d_model))
+
+        # else:
+        #     raise ValueError("Lacking proj_dims")
+
+        self.model = Mamba(
+            # This module uses roughly 3 * expand * d_model^2 parameters
+            d_model=d_model, # Model dimension d_model
+            d_state=d_state,  # SSM state expansion factor
+            d_conv=4,    # Local convolution width
+            expand=2,    # Block expansion factor
+        )
+
+
+    def forward(self, modalities):
+        """Apply MambaFusionTransformer Layer to input.
+
+        Args:
+            x (torch.Tensor): A list of tensors, one for each modality.
+                             Each tensor can be(Batch, Dim) or (Batch, Seq_Len, Dim).
+
+        Returns:
+            torch.Tensor: Layer output
+        """
+
+        # processed_x = []
+
+        # # Project and format each modality
+        # for i, mod in enumerate(x):
+        #     # Project to shared dimension
+        #     mod_projected = self.projections[i](mod)
+
+            # If the modality is just (Batch, Dim), add a sequence dimension -> 
+
+        # mamba_out = self.mamba(x)
+        # pooled_out = mamba_out.mean(dim=1)
+        # logits = self.classifier(pooled_out)
+
+        flattened = []
+        # print(f"The shape of modalities -  type - {type(modalities)} -  {len(modalities)}\n\n")
+        # for idx, modality in enumerate(modalities):
+            # print(f"Modality {idx} - type - {type(modality)} shape {modality.shape}")
+            # flattened.append(torch.flatten(modality, start_dim=1))
+
+        batch_size, seq_length, nfeatures = modalities[1].shape
+
+        mod_modalities = modalities[0].repeat(seq_length, 1, 1)
+
+        # print(f"the shape of mod_modalities after repeat {mod_modalities.shape}")
+
+        mod_modalities = torch.permute(mod_modalities, (1, 0, 2))
+        
+        mod_modalities = torch.cat((mod_modalities, modalities[1]), dim=2)
+
+        # mod_modalities = modalities[1] + modalities[0].unsqueeze(1)
+
+        temp = self.model(mod_modalities)
+        # print(f"Shape of mamba output : {temp.shape}")
+        temp2 = torch.flatten(temp, start_dim=1)
+        # print(f"Shape of mamba output : {temp2.shape}")
+
+        return temp2
+
+
+    
