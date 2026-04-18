@@ -478,7 +478,7 @@ class LateFusionTransformer(nn.Module):
         return x
 
 
-class MambaFusion(nn.Module):
+class MimicMambaFusion(nn.Module):
     
     def __init__(self, d_model=128, d_state=16, num_classes=2):
         """Initialize SimpleMambaFusion Architecture"""
@@ -486,14 +486,6 @@ class MambaFusion(nn.Module):
         super().__init__()
 
         self.d_model = d_model
-        # self.projections = nn.ModuleList()
-        # if proj_dims is not None:
-        #     for d_in in proj_dims:
-        #         self.projections.append(nn.Linear(d_in, d_model))
-
-        # else:
-        #     raise ValueError("Lacking proj_dims")
-
         self.model = Mamba(
             # This module uses roughly 3 * expand * d_model^2 parameters
             d_model=d_model, # Model dimension d_model
@@ -514,19 +506,6 @@ class MambaFusion(nn.Module):
             torch.Tensor: Layer output
         """
 
-        # processed_x = []
-
-        # # Project and format each modality
-        # for i, mod in enumerate(x):
-        #     # Project to shared dimension
-        #     mod_projected = self.projections[i](mod)
-
-            # If the modality is just (Batch, Dim), add a sequence dimension -> 
-
-        # mamba_out = self.mamba(x)
-        # pooled_out = mamba_out.mean(dim=1)
-        # logits = self.classifier(pooled_out)
-
         flattened = []
         # print(f"The shape of modalities -  type - {type(modalities)} -  {len(modalities)}\n\n")
         # for idx, modality in enumerate(modalities):
@@ -543,14 +522,9 @@ class MambaFusion(nn.Module):
         
         mod_modalities = torch.cat((mod_modalities, modalities[1]), dim=2)
 
-        # mod_modalities = modalities[1] + modalities[0].unsqueeze(1)
-
         temp = self.model(mod_modalities)
         # print(f"Shape of mamba output : {temp.shape}")
         temp2 = torch.flatten(temp, start_dim=1)
         # print(f"Shape of mamba output : {temp2.shape}")
 
         return temp2
-
-
-    

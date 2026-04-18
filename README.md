@@ -77,15 +77,15 @@ To accompany MultiBench, we also provide a standardized implementation of 20 cor
 
 ## Datasets currently supported
 
-1. Affective computing: MUStARD, CMU-MOSI, UR-FUNNY, CMU-MOSEI
+<!-- 1. Affective computing: MUStARD, CMU-MOSI, UR-FUNNY, CMU-MOSEI -->
 2. Healthcare: MIMIC
-3. Robotics: MuJoCo Push, Vision & Touch
+<!-- 3. Robotics: MuJoCo Push, Vision & Touch
 4. Finance: Stocks-food, Stocks-health, Stocks-tech
 5. HCI: ENRICO
 6. Multimedia: AV-MNIST, MM-IMDb, Kinetics-S, Kinetics-L
-7. RTFM env
+7. RTFM env -->
 
-![](/images/datasets.png)
+<!-- ![](/images/datasets.png)
 
 To add a new dataset:
 
@@ -276,4 +276,4 @@ We visualize the experiment results using two metrics, relative and effective ro
 
 6/11/2021: Refactored some code. Specifically, we deprecated the Simple_Early_Fusion, Simple_Late_Fusion, MVAE, MFM, CCA, Contrastive training structures with the new `Supervised_Learning` training structure, and modified some `examples/` files accordingly. We also integrated the dataloaders and testing scripts for robustness experiments into the regular ones. The deprecated training structures as well as their examples can be found in `deprecated_training_structures/` and `deprecated_examples/` folders. The deprecated dataloaders and testing scripts specifically for robustness can be found in `deprecated_dataloaders/` and `deprecated_examples_robust/` folders.
 
-7/9/2021: Added support for Clotho (audio captioning), Yummly-28K (image-text retrieval), RTFM (language-guided reinforcement learning). We plan to use this as a starting point to gradually expand our repo to include QA, retrieval, generative, and RL tasks as well.
+7/9/2021: Added support for Clotho (audio captioning), Yummly-28K (image-text retrieval), RTFM (language-guided reinforcement learning). We plan to use this as a starting point to gradually expand our repo to include QA, retrieval, generative, and RL tasks as well. -->
