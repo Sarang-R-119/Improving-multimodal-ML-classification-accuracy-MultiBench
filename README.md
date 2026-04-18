@@ -1,13 +1,20 @@
-# MultiBench: Multiscale Benchmarks for Multimodal Representation Learning
+# Improving Multimodal ML Classification Accuracy 
+### This is a modified fork of 'MultiBench: Multiscale Benchmarks for Multimodal Representation Learning'
 
 [MultiBench website](https://cmu-multicomp-lab.github.io/multibench/)
 
-[![codecov](https://codecov.io/gh/pliang279/MultiBench/branch/main/graph/badge.svg?token=IN899HIWCF)](https://codecov.io/gh/pliang279/MultiBench)
+<!-- [![codecov](https://codecov.io/gh/pliang279/MultiBench/branch/main/graph/badge.svg?token=IN899HIWCF)](https://codecov.io/gh/pliang279/MultiBench)
 [![Documentation Status](https://readthedocs.org/projects/multibench/badge/?version=latest)](https://multibench.readthedocs.io/en/latest/?badge=latest)
 
-[Documentation](https://multibench.readthedocs.io/en/latest/), [Tutorials and examples](https://github.com/pliang279/MultiBench/tree/main/examples)
+[Documentation](https://multibench.readthedocs.io/en/latest/), [Tutorials and examples](https://github.com/pliang279/MultiBench/tree/main/examples) -->
 
 ## Contributors
+Correspondence to:
+- [Sarang Rajeev](https://github.com/Sarang-R-119) (sarangr@umich.edu)
+- [Vincent Chen](https://github.com/vincentChen71) (vpchen@umich.edu)
+- [Paquito B](https://github.com/dinopaq) (dinopaq@umich.edu)
+- [Varad Chapalgaonkar](https://github.com/varadchap) (varadc@umich.edu)
+<!-- ## Contributors
 
 Correspondence to: 
   - [Paul Pu Liang](http://www.cs.cmu.edu/~pliang/) (pliang@cs.cmu.edu)
@@ -22,9 +29,9 @@ Correspondence to:
   - [Michelle A. Lee](http://stanford.edu/~mishlee/) (michellelee@cs.stanford.edu)
   - [Yuke Zhu](https://www.cs.utexas.edu/~yukez/) (yukez@cs.utexas.edu)
   - [Ruslan Salakhutdinov](https://www.cs.cmu.edu/~rsalakhu/) (rsalakhu@cs.cmu.edu)
-  - [Louis-Philippe Morency](https://www.cs.cmu.edu/~morency/) (morency@cs.cmu.edu)
+  - [Louis-Philippe Morency](https://www.cs.cmu.edu/~morency/) (morency@cs.cmu.edu) -->
 
-## Paper
+<!-- ## Paper
 
 [**MultiZoo & MultiBench: A Standardized Toolkit for Multimodal Deep Learning**](https://www.jmlr.org/papers/volume24/22-1021/22-1021.pdf)<br>
 Paul Pu Liang, Yiwei Lyu, Xiang Fan, Arav Agarwal, Yun Cheng, Louis-Philippe Morency, Ruslan Salakhutdinov<br>
@@ -52,19 +59,21 @@ If you find this repository useful, please cite our paper and corresponding soft
   booktitle={Thirty-fifth Conference on Neural Information Processing Systems Datasets and Benchmarks Track (Round 1)},
   year={2021}
 }
-```
+``` -->
 
 ## Overview
 
 ![](/images/overview.png)
 
-Learning multimodal representations involves integrating information from multiple heterogeneous sources of data. It is a challenging yet crucial area with numerous real-world applications in multimedia, affective computing, robotics, finance, human-computer interaction, and healthcare. Unfortunately, multimodal research has seen limited resources to study (1) generalization across domains and modalities, (2) complexity during training and inference, and (3) robustness to noisy and missing modalities.
+This improves the overall Multimodal ML classification accuracy of MultiBench benchmark.
+
+<!-- Learning multimodal representations involves integrating information from multiple heterogeneous sources of data. It is a challenging yet crucial area with numerous real-world applications in multimedia, affective computing, robotics, finance, human-computer interaction, and healthcare. Unfortunately, multimodal research has seen limited resources to study (1) generalization across domains and modalities, (2) complexity during training and inference, and (3) robustness to noisy and missing modalities.
 
 In order to accelerate progress towards understudied modalities and tasks while ensuring real-world robustness, we release MultiBench, a systematic and unified large-scale benchmark for multimodal learning spanning 15 datasets, 10 modalities, 20 prediction tasks, and 6 research areas. MultiBench provides an automated end-to-end machine learning pipeline that simplifies and standardizes data loading, experimental setup, and model evaluation. To reflect real-world requirements, MultiBench is designed to holistically evaluate (1) performance across domains and modalities, (2) complexity during training and inference, and (3) robustness to noisy and missing modalities.
 
 ![](/images/multizoo.png)
 
-To accompany MultiBench, we also provide a standardized implementation of 20 core approaches in multimodal learning unifying innovations in fusion paradigms, optimization objectives, and training approaches which we call MultiZoo. MultiZoo implements these methods in a modular fashion to enable accessibility for new researchers, compositionality of approaches, and reproducibility of results.
+To accompany MultiBench, we also provide a standardized implementation of 20 core approaches in multimodal learning unifying innovations in fusion paradigms, optimization objectives, and training approaches which we call MultiZoo. MultiZoo implements these methods in a modular fashion to enable accessibility for new researchers, compositionality of approaches, and reproducibility of results. -->
 
 ## Datasets currently supported
 
