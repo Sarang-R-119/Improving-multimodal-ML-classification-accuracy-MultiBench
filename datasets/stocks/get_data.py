@@ -7,10 +7,10 @@ from posixpath import split
 import io
 import numpy as np
 import pandas as pd
+import requests
 import torch
 from torch.utils.data import DataLoader
 from torch import nn
-import yfinance as yf
 
 
 def get_dataloader(stocks, input_stocks, output_stocks, batch_size=16, train_shuffle=True, start_date=datetime.datetime(2000, 6, 1), end_date=datetime.datetime(2021, 2, 28), window_size=500, val_split=3200, test_split=3700, modality_first=True, cuda=True):
@@ -36,19 +36,10 @@ def get_dataloader(stocks, input_stocks, output_stocks, batch_size=16, train_shu
     stocks = np.array(stocks)
 
     def _fetch_finance_data(symbol, start, end):
-        """Fetch daily OHLCV data for a symbol using yfinance."""
-        df = yf.download(
-            tickers=symbol,
-            start=start,
-            end=end,
-            interval="1d",
-            auto_adjust=False,
-            progress=False,
-        )
-        # Ensure we always return a DataFrame with a DatetimeIndex and expected columns
-        if df.empty:
-            return pd.DataFrame(columns=["Open"])
-        return df
+        url = f'https://query1.finance.yahoo.com/v7/finance/download/{symbol}?period1={start.strftime("%s")}&period2={end.strftime("%s")}&interval=1d&events=history&includeAdjustedClose=true'
+        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        text = requests.get(url, headers={'User-Agent': user_agent}).text
+        return pd.read_csv(io.StringIO(text), encoding='utf8', parse_dates=True, index_col=0)
 
     data = []
     for stock in stocks:
@@ -64,20 +55,8 @@ def get_dataloader(stocks, input_stocks, output_stocks, batch_size=16, train_shu
         [np.where(data['Symbol'] == x)[0][0] for x in input_stocks])
     output_stocks = np.array(
         [np.where(data['Symbol'] == x)[0][0] for x in output_stocks])
-    # pivot to Date x Symbol table
-    wide = data.pivot_table(index='Date', columns='Symbol', values='Open')
-    # keep only the stocks you care about (same order)
-    wide = wide[list(stocks)]
-    # drop days where any of the symbols is missing
-    wide = wide.dropna()
-    # now wide.values has shape (n_days_common, len(stocks))
-    open_vals = wide.values.astype(np.float32)
-    X = torch.tensor(open_vals, dtype=torch.float32)  # shape (n_days_common, len(stocks))
 
-    # RX = torch.log(X[1:] / X[:-1])
-
-
-    # X = torch.tensor(list(data['Open'])).view(-1, len(stocks))
+    X = torch.tensor(list(data['Open'])).view(-1, len(stocks))
     RX = torch.log(X[1:] / X[:-1])
     Y = RX[window_size:, output_stocks]
     Y = Y * Y
