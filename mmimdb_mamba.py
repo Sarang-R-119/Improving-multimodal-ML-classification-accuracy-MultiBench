@@ -6,7 +6,7 @@ sys.path.append(os.getcwd())
 
 from unimodals.common_models import MaxOut_MLP
 from datasets.imdb.get_data import get_dataloader
-from fusions.common_fusions import MambaFusion
+from fusions.common_fusions import IMDBMambaFusion
 from training_structures.Supervised_Learning import train, test
 
 
@@ -24,7 +24,7 @@ encoders = [
     MaxOut_MLP(512, 1024, 4096, 512, linear_layer=False).cuda(),
 ]
 d_model = 256
-fusion = MambaFusion(
+fusion = IMDBMambaFusion(
     proj_dims=[512, 512],
     d_model=d_model,
     d_state=16,

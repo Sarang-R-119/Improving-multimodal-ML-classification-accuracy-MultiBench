@@ -1,5 +1,6 @@
 """Implements common fusion patterns."""
 
+import inspect
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -478,7 +479,7 @@ class LateFusionTransformer(nn.Module):
         return x
 
 
-class MimicMambaFusion(nn.Module):
+class MambaFusion(nn.Module):
     
     def __init__(self, d_model=128, d_state=16, num_classes=2):
         """Initialize SimpleMambaFusion Architecture"""
@@ -530,58 +531,38 @@ class MimicMambaFusion(nn.Module):
         return temp2
 
 
-class MambaFusion(nn.Module):
-    def __init__(self, proj_dims, d_model=128, d_state=16, d_conv=4, expand=2, num_layers=1):
-        """
-        Generic Mamba Fusion
+class IMDBMambaFusion(nn.Module):
+    """Project each modality to ``d_model``, concatenate as a short sequence, run Mamba, mean-pool."""
 
-        Args:
-            proj_dims (list): The feature dimensions of your encoders (e.g., [10, 30] or [300, 4096])
-            d_model (int): The shared internal dimension for Mamba.
-        """
-
-        super(MambaFusion, self).__init__()
-
+    def __init__(
+        self,
+        proj_dims,
+        d_model=128,
+        d_state=16,
+        d_conv=4,
+        expand=2,
+        num_layers=1,
+        use_fast_path=False,
+    ):
+        super().__init__()
         self.d_model = d_model
 
-        # Dynamic projections: Maps every modality to the exact same
-        # d_model size
-        self.projections = nn.ModuleList([
-            nn.Linear(d_in, d_model) for d_in in proj_dims
-        ])
+        self.proj = nn.ModuleList(nn.Linear(d_in, d_model) for d_in in proj_dims)
+        self.norm = nn.LayerNorm(d_model)
 
-        self.mamba_layers = nn.ModuleList([
-            Mamba(
-                d_model=d_model,
-                d_state=d_state,
-                d_conv=d_conv,
-                expand=expand
-            )for _ in range(num_layers)
-        ])
+        mk = dict(d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand)
+        if "use_fast_path" in inspect.signature(Mamba.__init__).parameters:
+            mk["use_fast_path"] = use_fast_path
+        self.mamba = nn.Sequential(*(Mamba(**mk) for _ in range(num_layers)))
 
     def forward(self, modalities):
-        """
-        modalities: A list of tensors of any length, with mixed 2D or 3D shapes.
-        """
-        processed_mods = []
-
-        # Project and reshape every modality dynamically
-        for i, mod in enumerate(modalities):
-            # Project from raw feature size to d_model size
-            mod_projected = self.projections[i](mod)
-
-
-            if mod_projected.dim() ==2:
-                mod_projected = mod_projected.unsqueeze(1)
-
-            processed_mods.append(mod_projected)
-
-        # String the processed modalities end-to-end
-        fused_seq = torch.cat(processed_mods, dim=1)
-
-        for mamba in self.mamba_layers:
-            fused_seq = mamba(fused_seq)
-
-        # Pool (average) instead of flatten the sequence lengths can change based on datasets.
-        return fused_seq.mean(dim=1)
+        # (B, d_i) -> (B, 1, d_model); already-3D modalities pass through unchanged except projection.
+        tokens = []
+        for x, lin in zip(modalities, self.proj):
+            x = lin(x)
+            if x.dim() == 2:
+                x = x.unsqueeze(1)
+            tokens.append(x)
+        h = self.norm(torch.cat(tokens, dim=1))
+        return self.mamba(h).mean(dim=1)
 
