@@ -9,7 +9,6 @@ import torch.optim as optim
 from mamba_ssm import Mamba
 
 
-
 class Concat(nn.Module):
     """Concatenation of input data on dimension 1."""
 
@@ -27,9 +26,6 @@ class Concat(nn.Module):
         for modality in modalities:
             flattened.append(torch.flatten(modality, start_dim=1))
         return torch.cat(flattened, dim=1)
-
-        # print(f"Shape of Cat output : {temp.shape}")
-    
 
 
 
@@ -477,7 +473,6 @@ class LateFusionTransformer(nn.Module):
         x = self.transformer(x)[-1]
         return x
 
-
 class MambaFusion(nn.Module):
     
     def __init__(self, d_model=128, d_state=16, num_classes=2):
@@ -503,7 +498,7 @@ class MambaFusion(nn.Module):
         )
 
 
-    def forward(self, modalities):
+def forward(self, modalities):
         """Apply MambaFusionTransformer Layer to input.
 
         Args:
@@ -527,23 +522,46 @@ class MambaFusion(nn.Module):
         # pooled_out = mamba_out.mean(dim=1)
         # logits = self.classifier(pooled_out)
 
-        flattened = []
+        # flattened = []
         # print(f"The shape of modalities -  type - {type(modalities)} -  {len(modalities)}\n\n")
         # for idx, modality in enumerate(modalities):
             # print(f"Modality {idx} - type - {type(modality)} shape {modality.shape}")
             # flattened.append(torch.flatten(modality, start_dim=1))
 
-        batch_size, seq_length, nfeatures = modalities[1].shape
+        for m in modalities:
+            if len(m.size()) == 3:
+                batch_size, seq_length, _ = m.shape
+                break
 
-        mod_modalities = modalities[0].repeat(seq_length, 1, 1)
+        try:
+            mod_modalities = None
+            for m in modalities:
+                # print(m.shape)
+                if len(m.size())<3:
+                    broadcasted = m.repeat(seq_length,1,1)
+                    if mod_modalities is not None:
+                        mod_modalities = torch.cat((mod_modalities,broadcasted), dim=2)
+                    else:
+                        mod_modalities = broadcasted
+                else:
+                    if mod_modalities is not None:
+                        mod_modalities = torch.cat((mod_modalities,m), dim=2)
+                    else:
+                        mod_modalities = m
+        except Exception as e:
+            print(e)
+            raise Exception("Most likely no modalities are timeseries")
 
-        # print(f"the shape of mod_modalities after repeat {mod_modalities.shape}")
+        # print(mod_modalities.size())
+        # mod_modalities = modalities[0].repeat(seq_length, 1, 1)
 
-        mod_modalities = torch.permute(mod_modalities, (1, 0, 2))
+        # # print(f"the shape of mod_modalities after repeat {mod_modalities.shape}")
+
+        # mod_modalities = torch.permute(mod_modalities, (1, 0, 2))
         
-        mod_modalities = torch.cat((mod_modalities, modalities[1]), dim=2)
+        # mod_modalities = torch.cat((mod_modalities, modalities[1]), dim=2)
 
-        # mod_modalities = modalities[1] + modalities[0].unsqueeze(1)
+        # # mod_modalities = modalities[1] + modalities[0].unsqueeze(1)
 
         temp = self.model(mod_modalities)
         # print(f"Shape of mamba output : {temp.shape}")
@@ -551,6 +569,3 @@ class MambaFusion(nn.Module):
         # print(f"Shape of mamba output : {temp2.shape}")
 
         return temp2
-
-
-    
