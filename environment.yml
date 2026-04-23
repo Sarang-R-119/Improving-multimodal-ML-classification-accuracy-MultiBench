@@ -1,4 +1,4 @@
-name: /home/pliang/miniconda3/envs/vanvan/multibench
+name: multibench_m
 channels:
   - defaults
 dependencies:
