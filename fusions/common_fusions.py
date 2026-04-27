@@ -1,6 +1,7 @@
 """Implements common fusion patterns."""
 
 import inspect
+from this import d
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -566,3 +567,65 @@ class IMDBMambaFusion(nn.Module):
         h = self.norm(torch.cat(tokens, dim=1))
         return self.mamba(h).mean(dim=1)
 
+class MimicMambaFusion(nn.Module):
+
+    def __init__(self, d_model=40, d_state=16, d_time=10, d_static=30):
+        """Initializes MimicMambaFusion Architecture"""
+
+        super().__init__()
+
+        self.d_model = d_model
+        self.d_time = d_time
+        self.d_static = d_static
+        self.model = Mamba(
+            d_model=d_model,
+            d_state=d_state,
+            d_conv=3,
+            expand=2
+        )
+        # Made kernel size odd to avoid error if the T is less than 10. Changed B,L,D_time to B,L,D_model
+        self.conv = nn.Conv1d(d_model, d_model,
+                              kernel_size=20, padding=9)
+                            
+
+        self.static_proj = nn.Linear(self.d_static, self.d_model)
+        self.time_proj = nn.Linear(self.d_time, self.d_model)
+
+        # To stop creating layers inside forward().
+
+    def forward(self, modalities:torch.Tensor):
+        """Apply MambaFusionTransformer Layer to input.
+
+        Args:
+            x (torch.Tensor): A list of tensors, one for each modality.
+                             Each tensor can be(Batch, Dim) or (Batch, Seq_Len, Dim).
+
+        Returns:
+            torch.Tensor: Layer output
+        """
+
+        # batch_size, seq_length, d_time = modalities[1].shape
+        # _, d_static = modalities[0].shape
+
+        # Project the feature dimension of static data to d_model. Add length-1 sequence dimension.
+        static_modalities = self.static_proj(modalities[0]) # (B, d_model)
+        static_modalities = static_modalities.unsqueeze(1) #(B, 1, d_model)
+        
+        # Project the feature dimension of timeseries to d_model.
+        time_modalities = self.time_proj(modalities[1])
+                                        
+        # Switching the dimension to convolve over time. (B,T,d_model) -> (B,d_model,T)
+        time_modalities = time_modalities.transpose(1, 2) # (B,T',d_model) -> (B,d_model,T)
+        time_modalities = self.conv(time_modalities)
+        time_modalities = time_modalities.transpose(1, 2) # (B,d_model, T') -> (B,T', d_model)
+        
+        # Concatenate over time.
+        h = torch.cat([static_modalities, time_modalities], dim=1)
+
+        h_out = self.model(h)
+
+        # Pool only the time-series data.
+        ts_mean = h_out[:, 1:, :].mean(dim=1)   # (B, d_model)
+        static_token = h_out[:, 0, :]             # (B, d_model)
+
+        return torch.cat([static_token, ts_mean], dim=-1)
