@@ -18,9 +18,9 @@ traindata, validdata, testdata = get_dataloader(
 
 
 encoders = [MLP(5, 10, 10, dropout=False).cuda(), GRU(
-    12, 30, dropout=True, batch_first=True).cuda()]
+    12, 128, dropout=True, batch_first=True).cuda()]
 # fusion = IMDBMambaFusion(proj_dims=[10, 30], d_model=128).cuda()
-fusion = MimicMambaFusion(d_model=32, d_static=10, d_time=30).cuda()
+fusion = MimicMambaFusion(d_model=32, d_static=10, d_time=128).cuda()
 head = MLP(64, 40, 2, dropout=False).cuda()
 
 # train
