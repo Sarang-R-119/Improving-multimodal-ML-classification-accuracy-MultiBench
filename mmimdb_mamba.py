@@ -16,7 +16,7 @@ traindata, validdata, testdata = get_dataloader(
     "/scratch/eecs545w26_class_root/eecs545w26_class/sarangr/mmimdb_parent/mmimdb",
     vgg=True,
     batch_size=128,
-    no_robust=True,
+    no_robust=False,
 )
 
 encoders = [
