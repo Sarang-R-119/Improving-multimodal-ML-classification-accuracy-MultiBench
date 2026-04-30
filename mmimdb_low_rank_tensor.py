@@ -28,6 +28,6 @@ train(encoders, fusion, head, traindata, validdata, 1000, early_stop=True, task=
       save=filename, optimtype=torch.optim.AdamW, lr=8e-3, weight_decay=0.01, objective=torch.nn.BCEWithLogitsLoss())
 
 print("Testing:")
-model = torch.load(filename).cuda()
+model = torch.load(filename, weights_only=False).cuda()
 test(model, testdata, method_name="lrtf", dataset="imdb",
      criterion=torch.nn.BCEWithLogitsLoss(), task="multilabel")
