@@ -1,5 +1,5 @@
 from datasets.mimic.get_data import get_dataloader # noqa
-from fusions.common_fusions import MambaFusion # noqa
+from fusions.common_fusions import IMDBMambaFusion # noqa
 from training_structures.Supervised_Learning import train, test # noqa
 from unimodals.common_models import MLP, GRU # noqa
 
@@ -19,8 +19,8 @@ traindata, validdata, testdata = get_dataloader(
 # build encoders, head and fusion layer
 encoders = [MLP(5, 10, 10, dropout=False).cuda(), GRU(
     12, 30, dropout=False, batch_first=True).cuda()]
-head = MLP(960, 40, 2, dropout=False).cuda()
-fusion = MambaFusion(d_model=40).cuda()
+fusion = IMDBMambaFusion(proj_dims=[10, 30], d_model=128).cuda()
+head = MLP(128, 40, 2, dropout=False).cuda()
 
 # train
 train(encoders, fusion, head, traindata, validdata, 20, auprc=True)

@@ -1,5 +1,5 @@
 from datasets.mimic.get_data import get_dataloader # noqa
-from fusions.common_fusions import MambaFusion # noqa
+from fusions.common_fusions import IMDBMambaFusion, MimicMambaFusion # noqa
 from training_structures.Supervised_Learning import train, test # noqa
 from unimodals.common_models import MLP, GRU # noqa
 
@@ -16,11 +16,12 @@ sys.path.append(os.getcwd())
 traindata, validdata, testdata = get_dataloader(
     7, imputed_path='/scratch/eecs545w26_class_root/eecs545w26_class/sarangr/mimic/im.pk')
 
-# build encoders, head and fusion layer
+
 encoders = [MLP(5, 10, 10, dropout=False).cuda(), GRU(
-    12, 30, dropout=False, batch_first=True).cuda()]
-head = MLP(960, 40, 2, dropout=False).cuda()
-fusion = MambaFusion(d_model=40).cuda()
+    12, 128, dropout=True, batch_first=True).cuda()]
+# fusion = IMDBMambaFusion(proj_dims=[10, 30], d_model=128).cuda()
+fusion = MimicMambaFusion(d_model=32, d_static=10, d_time=128).cuda()
+head = MLP(64, 40, 2, dropout=False).cuda()
 
 # train
 train(encoders, fusion, head, traindata, validdata, 20, auprc=True)
