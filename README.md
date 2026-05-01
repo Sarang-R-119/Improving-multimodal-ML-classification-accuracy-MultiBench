@@ -1,6 +1,8 @@
 # Improving Multimodal ML Classification Accuracy 
 ### This is a modified fork of 'MultiBench: Multiscale Benchmarks for Multimodal Representation Learning'
 
+This repository explores the integration of Mamba (Selective State Space Models) into the MultiBench unified framework. We replace traditional fusion mechanisms (like Transformers and Low-Rank Tensor Fusion) with Mamba blocks to achieve linear scaling and improved robustness in multimodal time-series and multimedia tasks.
+
 [MultiBench website](https://cmu-multicomp-lab.github.io/multibench/)
 
 <!-- [![codecov](https://codecov.io/gh/pliang279/MultiBench/branch/main/graph/badge.svg?token=IN899HIWCF)](https://codecov.io/gh/pliang279/MultiBench)
@@ -77,13 +79,31 @@ To accompany MultiBench, we also provide a standardized implementation of 20 cor
 
 ## Datasets currently supported
 
-<!-- 1. Affective computing: MUStARD, CMU-MOSI, UR-FUNNY, CMU-MOSEI -->
+1. Affective computing: MUStARD, CMU-MOSI, UR-FUNNY, CMU-MOSEI
 2. Healthcare: MIMIC
-<!-- 3. Robotics: MuJoCo Push, Vision & Touch
-4. Finance: Stocks-food, Stocks-health, Stocks-tech
-5. HCI: ENRICO
-6. Multimedia: AV-MNIST, MM-IMDb, Kinetics-S, Kinetics-L
-7. RTFM env -->
+<!-- 3. Robotics: MuJoCo Push, Vision & Touch -->
+<!-- 4. Finance: Stocks-food, Stocks-health, Stocks-tech -->
+<!-- 5. HCI: ENRICO -->
+3. Multimedia: MM-IMDb
+<!-- 7. RTFM env -->
+
+# Installation
+
+This project requires a GPU with CUDA 11.6+ and the mamba-ssm library.
+
+```bash
+# Clone the repository
+git clone https://github.com/Sarang-R-119/Improving-multimodal-ML-classification-accuracy-MultiBench
+cd Mamba-MultiBench
+
+# Create a mamba environment
+mamba env create -f environment_2026.yml
+mamba activate multibench_m
+
+# Install dependencies
+pip install torch torchvision torchaudio
+pip install mamba-ssm causal-conv1d>=1.2.0
+```
 
 <!-- ![](/images/datasets.png)
 
