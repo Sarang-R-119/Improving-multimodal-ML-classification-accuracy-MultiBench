@@ -594,23 +594,44 @@ class IMDBMambaFusion(nn.Module):
         super().__init__()
         self.d_model = d_model
 
+        # Create individual proj layers.
         self.proj = nn.ModuleList(nn.Linear(d_in, d_model) for d_in in proj_dims)
         self.norm = nn.LayerNorm(d_model)
 
-        mk = dict(d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand)
-        if "use_fast_path" in inspect.signature(Mamba.__init__).parameters:
-            mk["use_fast_path"] = use_fast_path
-        self.mamba = nn.Sequential(*(Mamba(**mk) for _ in range(num_layers)))
+        # Mamba args for Mamba block initialization.
+        mamba_arg_dict = dict(d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand)
+        
+        # Initialize the Mamba layers
+        mamba_blocks = []
+        for i in range(num_layers):
+            mamba_blocks.append(Mamba(**mamba_arg_dict))
+        self.mamba = nn.Sequential(*mamba_blocks)
+        
 
     def forward(self, modalities):
+        """Apply IMDBMambaFusion Layer to input.
+
+        Args:
+            modalities (torch.Tensor): A list of tensors, one for each modality.
+                             Each tensor can be(Batch, Dim) or (Batch, Seq_Len, Dim).
+
+        Returns:
+            torch.Tensor: Layer output
+        """
         # (B, d_i) -> (B, 1, d_model); already-3D modalities pass through unchanged except projection.
         tokens = []
+
+        # Process each modality with corresponding proj layer.
         for x, lin in zip(modalities, self.proj):
             x = lin(x)
+            # Check for static vector.
             if x.dim() == 2:
                 x = x.unsqueeze(1)
             tokens.append(x)
+
+        # Concat along the time dimension.
         h = self.norm(torch.cat(tokens, dim=1))
+        
         return self.mamba(h).mean(dim=1)
 
 class MimicMambaFusion(nn.Module):

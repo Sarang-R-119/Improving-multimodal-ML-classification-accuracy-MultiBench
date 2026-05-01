@@ -79,12 +79,12 @@ To accompany MultiBench, we also provide a standardized implementation of 20 cor
 
 ## Datasets currently supported
 
-1. Affective computing: MUStARD, CMU-MOSI, UR-FUNNY, CMU-MOSEI
+1. Affective computing: CMU-MOSI, CMU-MOSEI
 2. Healthcare: MIMIC
+3. Multimedia: MM-IMDb
 <!-- 3. Robotics: MuJoCo Push, Vision & Touch -->
 <!-- 4. Finance: Stocks-food, Stocks-health, Stocks-tech -->
 <!-- 5. HCI: ENRICO -->
-3. Multimedia: MM-IMDb
 <!-- 7. RTFM env -->
 
 # Installation
